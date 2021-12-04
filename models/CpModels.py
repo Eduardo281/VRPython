@@ -19,13 +19,13 @@ class TSP_CP_Model(object):
             routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
         )
 
+    def solve(self, time=None, log=False, sol_log=False):
+        if(time != None):
+            self.search_parameters.time_limit.seconds = time
         self.solution = self.routing.SolveWithParameters(self.search_parameters)
 
         if self.solution:
-            self.print_solution()
-
-    def solve(self, time=None, log=False, sol_log=False):
-        pass
+            self.updateRouteAndRouteList()
 
     def distance_callback(self, from_index, to_index):
         from_node = self.manager.IndexToNode(from_index)
@@ -46,13 +46,30 @@ class TSP_CP_Model(object):
         print(plan_output)
         plan_output += 'Route distance: {}miles\n'.format(route_distance)
 
+    def updateRoute(self):
+        self.route = []
+        index = self.routing.Start(0)
+        while not self.routing.IsEnd(index):
+            new_index = self.solution.Value(self.routing.NextVar(index))
+            self.route.append((self.manager.IndexToNode(index), self.manager.IndexToNode(new_index)))
+            index = new_index
+
     def updateRouteList(self):
-        """Get vehicle routes from a solution and store them in an array."""
-        # Get vehicle routes and store them in a two dimensional array whose
-        # i,j entry is the jth location visited by vehicle i along its route.
         self.routeList = []
         index = self.routing.Start(0)
         self.routeList = [self.manager.IndexToNode(index)]
         while not self.routing.IsEnd(index):
             index = self.solution.Value(self.routing.NextVar(index))
             self.routeList.append(self.manager.IndexToNode(index))
+
+    def updateRouteAndRouteList(self):
+        self.route = []
+        self.routeList = []
+        index = self.routing.Start(0)
+        self.routeList = [self.manager.IndexToNode(index)]
+        while not self.routing.IsEnd(index):
+            new_index = self.solution.Value(self.routing.NextVar(index))
+            self.route.append((self.manager.IndexToNode(index), self.manager.IndexToNode(new_index)))
+            self.routeList.append(self.manager.IndexToNode(new_index))
+            index = new_index
+            
