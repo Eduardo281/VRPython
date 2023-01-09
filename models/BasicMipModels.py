@@ -20,12 +20,13 @@ class MatrixTspBaseModel(object):
         self.A = [(i, j) for i in self.V for j in self.V if(i != j)]
         self.route = []
         self.routeList = []
+        self.objectiveValue = None
 
-        self.model_sense = mip.MINIMIZE
+        self.modelSense = mip.MINIMIZE
         if(solver.lower()=="cbc"):
-            self.model = mip.Model(solver_name=mip.CBC, sense=self.model_sense)
+            self.model = mip.Model(solver_name=mip.CBC, sense=self.modelSense)
         elif(solver.lower()=="gurobi"):
-            self.model = mip.Model(solver_name=mip.GUROBI, sense=self.model_sense)
+            self.model = mip.Model(solver_name=mip.GUROBI, sense=self.modelSense)
         else:
             raise NameError('Invalid Solver name!')
 
@@ -60,12 +61,20 @@ class MatrixTspBaseModel(object):
                     break
             self.v0 = self.v1
 
-    def solve(self, totalRuntime=None, heur=None, printSolutionLog:bool=False) -> None:
+    def updateRouteAndRouteList(self):
+        self.updateRoute()
+        self.updateRouteList()
+    
+    def updateSolution(self):
+        self.updateRouteAndRouteList()
+        self.objectiveValue = self.model.objective_value
+
+    def solve(self, totalRuntime=None, heur=None, printSolverLog:bool=False) -> None:
         if(totalRuntime != None):
             self.model.max_seconds = totalRuntime
         if(heur != None):
             pass
-        if(printSolutionLog):
+        if(printSolverLog):
             self.model.verbose = 1
         else:
             self.model.verbose = 0
@@ -76,8 +85,7 @@ class MatrixTspBaseModel(object):
             (self.x[self.A[0]].x <= 2) == True
         except:
             return
-        self.updateRoute()
-        self.updateRouteList()
+        self.updateSolution()
         
     def printX(self, limX:float=0.5) -> None:
         try:
