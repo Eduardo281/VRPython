@@ -2,12 +2,10 @@ import mip
 import numpy as np
 from itertools import chain, combinations
 
-class TspBaseModel(object):
+class MatrixTspBaseModel(object):
     """Class to instantiate the common \"Base TSP\" model, that is, a binary assignment model,
     with functions to solve the model, print the $x$ variables, and show points and solutions."""
-    def __init__(self, c:np.ndarray, points:np.ndarray=None, dist_fun=None, 
-        relax:bool=False, solver:str="CBC", labels:np.ndarray=None
-    ):
+    def __init__(self, c:np.ndarray, relax_X_vars:bool=False, solver:str="CBC", labels:np.ndarray=None):
         if(not isinstance(c, np.ndarray)):
             try:
                 self.c = np.array(c)
@@ -15,11 +13,8 @@ class TspBaseModel(object):
                 raise TypeError("[ERROR] Could not convert data entered into a numpy.ndarray!")
         else:
             self.c = c
-        try:
-            if(self.c.shape[0] != self.c.shape[1]):
-                raise RuntimeError("[ERROR] Data must be a matrix having the same number of lines and columns!")
-        except:
-            raise TypeError("[ERROR] Data must be a matrix having the same number of lines and columns!")
+        if(self.c.shape[0] != self.c.shape[1]):
+            raise RuntimeError("[ERROR] Data must be a matrix having the same number of lines and columns!")
         self.n = len(self.c)
         self.V = set(range(self.n))
         self.A = [(i, j) for i in self.V for j in self.V if(i != j)]
@@ -34,7 +29,7 @@ class TspBaseModel(object):
         else:
             raise NameError('Invalid Solver name!')
 
-        if(relax):
+        if(relax_X_vars):
             self.x = {(i, j): self.model.add_var(lb=0, ub=1) for (i, j) in self.A}
         else:
             self.x = {(i, j): self.model.add_var(var_type=mip.BINARY) for (i, j) in self.A}
@@ -65,12 +60,12 @@ class TspBaseModel(object):
                     break
             self.v0 = self.v1
 
-    def solve(self, time=None, heur=None, log:bool=False) -> None:
-        if(time != None):
-            self.model.max_seconds = time
+    def solve(self, totalRuntime=None, heur=None, printSolutionLog:bool=False) -> None:
+        if(totalRuntime != None):
+            self.model.max_seconds = totalRuntime
         if(heur != None):
             pass
-        if(log):
+        if(printSolutionLog):
             self.model.verbose = 1
         else:
             self.model.verbose = 0
@@ -92,7 +87,7 @@ class TspBaseModel(object):
         for msg in ( print('x[{}, {}] = {}'.format(i, j, self.x[i, j].x)) for (i, j) in self.A if self.x[i, j].x > limX ):
             msg
         
-    def routeToVars(self, route):
+    def passRouteToVars(self, route):
         self.model.reset()
         for (i, j) in route:
             self.x[i, j].start = 1
@@ -111,12 +106,12 @@ class TspBaseModel(object):
         print('\n')
         return
 
-class TSP_DFJ_Model(TspBaseModel):
+class Matrix_TSP_DFJ_Model(MatrixTspBaseModel):
     """Class to instantiate the TSP model based on the classic DFJ formulation."""
-    def __init__(self, c, points=None, dist_fun=None, relax=False, solver="CBC"):
-        TspBaseModel.__init__(self, c, points, dist_fun, relax, solver)
+    def __init__(self, c, relax_X_vars=False, solver="CBC"):
+        MatrixTspBaseModel.__init__(self, c, relax_X_vars, solver)
 
-        # Setting the DFJ Sub-tour cutting constraint
+        # Setting the DFJ Sub-tour elimination constraints:
         self.POWER_SET = list(chain.from_iterable( combinations(self.V, r) for r in range(2, len(self.V)) ))
 
         # for S in self.POWER_SET:
@@ -125,23 +120,22 @@ class TSP_DFJ_Model(TspBaseModel):
         for cst in (mip.xsum(self.x[i, j] for i in S for j in S if i != j) <= len(S) - 1 for S in self.POWER_SET):
             self.model += cst
 
-class TSP_MTZ_Model(TspBaseModel):
+class Matrix_TSP_MTZ_Model(MatrixTspBaseModel):
     """Class to instantiate the TSP model based on the classic MTZ formulation."""
-    def __init__(self, c, points=None, dist_fun=None, relax=False, solver="CBC", model_type='classic'):
-        TspBaseModel.__init__(self, c, points, dist_fun, relax, solver)
-        self.model_type = model_type
+    def __init__(self, c, relax_X_vars=False, relax_U_vars=True, solver="CBC", modelType="classic"):
+        MatrixTspBaseModel.__init__(self, c, relax_X_vars, solver)
+        self.modelType = modelType
 
-        if(relax):
+        if(relax_U_vars):
             self.u = {i: self.model.add_var(lb=0, ub=(self.n-1)) for i in self.V}
         else:
-            #self.u = {i: self.model.add_var(var_type=mip.INTEGER, lb=0, ub=(self.n-1)) for i in self.V}
-            self.u = {i: self.model.add_var(lb=0, ub=(self.n-1)) for i in self.V}
+            self.u = {i: self.model.add_var(var_type=mip.INTEGER, lb=0, ub=(self.n-1)) for i in self.V}
         
-        if(self.model_type.lower() in ('classic', 'mtz')):
+        if(self.modelType.lower() in ('classic', 'mtz')):
             for(i, j) in self.A:
                 if(j!=0):
                     self.model += (self.u[i] - self.u[j] + self.n * self.x[i, j] <= self.n - 1)
-        elif(self.model_type.lower() in ('lift', 'lifted', 'dl')):
+        elif(self.modelType.lower() in ('lift', 'lifted', 'dl')):
             for(i, j) in self.A:
                 if(j!=0):
                     self.model += (self.u[i] - self.u[j] + self.n * self.x[i, j] + (self.n-2) * self.x[j, i] <= self.n - 1)
