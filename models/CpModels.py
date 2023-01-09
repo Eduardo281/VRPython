@@ -6,6 +6,7 @@ class Matrix_TSP_CP_Model(object):
         self.c = c
         self.route = []
         self.routeList = []
+        self.objectiveValue = None
 
         self.manager = pywrapcp.RoutingIndexManager(len(self.c), 1, 0)
         self.routing = pywrapcp.RoutingModel(self.manager)
@@ -25,24 +26,20 @@ class Matrix_TSP_CP_Model(object):
         self.solution = self.routing.SolveWithParameters(self.searchParameters)
 
         if self.solution:
-            self.updateRouteAndRouteList()
+            self.updateSolution()
 
     def distanceCallback(self, from_index, to_index):
         return self.c[self.manager.IndexToNode(from_index)][self.manager.IndexToNode(to_index)]
 
     def printSolution(self):
-        print('Objective Value: {}'.format(self.solution.ObjectiveValue()))
+        print("Objective Value: {}".format(self.objectiveValue))
         index = self.routing.Start(0)
-        plan_output = 'Route built:\n\n'
-        route_distance = 0
+        plan_output = "Route found:\n\n"
         while not self.routing.IsEnd(index):
             plan_output += ' {} ->'.format(self.manager.IndexToNode(index))
-            previous_index = index
             index = self.solution.Value(self.routing.NextVar(index))
-            route_distance += self.routing.GetArcCostForVehicle(previous_index, index, 0)
         plan_output += ' {}\n'.format(self.manager.IndexToNode(index))
         print(plan_output)
-        plan_output += 'Route distance: {}miles\n'.format(route_distance)
 
     def updateRoute(self):
         self.route = []
@@ -70,3 +67,7 @@ class Matrix_TSP_CP_Model(object):
             self.route.append((self.manager.IndexToNode(index), self.manager.IndexToNode(new_index)))
             self.routeList.append(self.manager.IndexToNode(new_index))
             index = new_index
+
+    def updateSolution(self):
+        self.updateRouteAndRouteList()
+        self.objectiveValue = self.solution.ObjectiveValue()
