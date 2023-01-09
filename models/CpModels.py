@@ -15,9 +15,9 @@ class Matrix_TSP_CP_Model(object):
         self.routing.SetArcCostEvaluatorOfAllVehicles(self.transitCallbackIndex)
 
         self.searchParameters = pywrapcp.DefaultRoutingSearchParameters()
-        self.searchParameters.first_solution_strategy = (
-            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
-        )
+        # self.searchParameters.first_solution_strategy = (
+        #     routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+        # )
 
     def solve(self, totalRuntime=None, printSolutionLog=False, sol_log=False):
         if(totalRuntime != None):
