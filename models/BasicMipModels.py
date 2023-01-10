@@ -105,13 +105,13 @@ class MatrixTspBaseModel(object):
 
     def printRoute(self) -> None:
         if (self.route == []):
-            print('No route available up to this moment!')
+            print("No route available up to this moment!")
             return
-        print('\nROUTE BUILT:\n')
+        print("Objective Value: {}".format(self.objectiveValue))
+        print("Route found:\n\n", end="")
         for item in self.routeList[:-1]:
-            print('{} -> '.format(item), end='')
-        print('0', end='')
-        print('\n')
+            print(" {} ->".format(item), end="")
+        print(" 0\n")
         return
 
 class Matrix_TSP_DFJ_Model(MatrixTspBaseModel):

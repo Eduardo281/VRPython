@@ -31,14 +31,14 @@ class Matrix_TSP_CP_Model(object):
     def distanceCallback(self, from_index, to_index):
         return self.c[self.manager.IndexToNode(from_index)][self.manager.IndexToNode(to_index)]
 
-    def printSolution(self):
+    def printRoute(self):
         print("Objective Value: {}".format(self.objectiveValue))
         index = self.routing.Start(0)
         plan_output = "Route found:\n\n"
         while not self.routing.IsEnd(index):
-            plan_output += ' {} ->'.format(self.manager.IndexToNode(index))
+            plan_output += " {} ->".format(self.manager.IndexToNode(index))
             index = self.solution.Value(self.routing.NextVar(index))
-        plan_output += ' {}\n'.format(self.manager.IndexToNode(index))
+        plan_output += " {}\n".format(self.manager.IndexToNode(index))
         print(plan_output)
 
     def updateRoute(self):
