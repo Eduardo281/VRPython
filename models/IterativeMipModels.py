@@ -40,8 +40,7 @@ class Matrix_Iterative_TSP_DFJ_Model(MatrixTspBaseModel):
             self.sub_circuits = list(simple_cycles(self.G))
             
             if(len(self.sub_circuits)) == 1:
-                self.updateRoute()
-                self.updateRouteList()
+                self.updateSolution()
                 return
             if(totalRuntime != None):
                 if(self.totalSolutionTime > totalRuntime):
@@ -49,8 +48,7 @@ class Matrix_Iterative_TSP_DFJ_Model(MatrixTspBaseModel):
                         (self.x[self.A[0]].x <= 2) == True
                     except:
                         return
-                    self.updateRoute()
-                    self.updateRouteList()
+                    self.updateSolution()
 
             for cycle in self.sub_circuits:
                 self.model += (mip.xsum(self.x[i, j] for i in cycle for j in cycle if (i != j)) <= len(cycle) - 1)
