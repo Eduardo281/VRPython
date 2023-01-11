@@ -16,13 +16,23 @@ class Matrix_TSP_CP_Model(object):
         self.routing.SetArcCostEvaluatorOfAllVehicles(self.transitCallbackIndex)
 
         self.searchParameters = pywrapcp.DefaultRoutingSearchParameters()
+
         # self.searchParameters.first_solution_strategy = (
         #     routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
         # )
 
-    def solve(self, totalRuntime=None, printSolutionLog=False, sol_log=False):
+        self.searchParameters.local_search_metaheuristic = (
+            routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+        )
+
+    def solve(self, totalRuntime=None, printSolverLog=False):
         if(totalRuntime != None):
             self.searchParameters.time_limit.seconds = totalRuntime
+        else:
+            print("The user need to specify a time limit for the solution procedure!")
+            return
+        if(printSolverLog):
+            self.searchParameters.log_search = True
         self.solution = self.routing.SolveWithParameters(self.searchParameters)
 
         if self.solution:
