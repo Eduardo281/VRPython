@@ -122,9 +122,6 @@ class Matrix_TSP_DFJ_Model(MatrixTspBaseModel):
         # Setting the DFJ Sub-tour elimination constraints:
         self.POWER_SET = list(chain.from_iterable( combinations(self.V, r) for r in range(2, len(self.V)) ))
 
-        # for S in self.POWER_SET:
-        #     self.model += (mip.xsum(self.x[i, j] for i in S for j in S if i != j) <= len(S) - 1)
-
         for cst in (mip.xsum(self.x[i, j] for i in S for j in S if i != j) <= len(S) - 1 for S in self.POWER_SET):
             self.model += cst
 
