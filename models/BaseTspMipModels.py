@@ -50,15 +50,15 @@ class MatrixTspBaseModel(object):
 
     def updateRouteList(self) -> None:
         self.routeList = [0]
-        self.v0 = 0
-        self.v1 = -1
-        while(self.v1 != 0):
+        v0 = 0
+        v1 = -1
+        while(v1 != 0):
             for item in self.route:
-                if item[0] == self.v0:
-                    self.v1 = item[1]
-                    self.routeList.append(self.v1)
+                if item[0] == v0:
+                    v1 = item[1]
+                    self.routeList.append(v1)
                     break
-            self.v0 = self.v1
+            v0 = v1
 
     def updateRouteAndRouteList(self):
         self.updateRoute()
