@@ -1,6 +1,5 @@
 import mip
 import numpy as np
-from itertools import chain, combinations
 
 class MatrixTspBaseModel(object):
     """Class to instantiate the common \"Base TSP\" model, that is, a binary assignment model,
@@ -99,9 +98,6 @@ class MatrixTspBaseModel(object):
         self.model.reset()
         for (i, j) in route:
             self.x[i, j].start = 1
-        #self.model.update()
-        self.route = route.copy()
-        self.updateRouteList()
 
     def printRoute(self) -> None:
         if (self.route == []):
@@ -114,54 +110,15 @@ class MatrixTspBaseModel(object):
         print(" 0\n")
         return
 
-class Matrix_TSP_DFJ_Model(MatrixTspBaseModel):
-    """Class to instantiate the TSP model based on the classic DFJ formulation."""
-    def __init__(self, c, relax_X_vars=False, solver="CBC"):
+class MatrixTspMtzBaseModel(MatrixTspBaseModel):
+    """Class to instantiate TSP models based on the Miller-Tucker-Zemlin (MTZ) formulation."""
+    def __init__(self, c, relax_X_vars=False, relax_U_vars=True, solver="CBC"):
         MatrixTspBaseModel.__init__(self, c, relax_X_vars, solver)
-
-        # Setting the DFJ Sub-tour elimination constraints:
-        self.POWER_SET = list(chain.from_iterable( combinations(self.V, r) for r in range(2, len(self.V)) ))
-
-        for cst in (mip.xsum(self.x[i, j] for i in S for j in S if i != j) <= len(S) - 1 for S in self.POWER_SET):
-            self.model += cst
-
-class Matrix_TSP_MTZ_Model(MatrixTspBaseModel):
-    """Class to instantiate the TSP model based on the classic MTZ formulation."""
-    def __init__(self, c, relax_X_vars=False, relax_U_vars=True, solver="CBC", modelType="classic"):
-        MatrixTspBaseModel.__init__(self, c, relax_X_vars, solver)
-        self.modelType = modelType
 
         if(relax_U_vars):
             self.u = {i: self.model.add_var(lb=0, ub=(self.n-1)) for i in self.V}
         else:
             self.u = {i: self.model.add_var(var_type=mip.INTEGER, lb=0, ub=(self.n-1)) for i in self.V}
-        
-        if(self.modelType.lower() in ('classic', 'mtz')):
-            for(i, j) in self.A:
-                if(j!=0):
-                    self.model += (self.u[i] - self.u[j] + self.n * self.x[i, j] <= self.n - 1)
-        elif(self.modelType.lower() in ('lift', 'lifted', 'dl')):
-            for(i, j) in self.A:
-                if(j!=0):
-                    self.model += (self.u[i] - self.u[j] + self.n * self.x[i, j] + (self.n-2) * self.x[j, i] <= self.n - 1)
-            for i in self.V:
-                if(0, i) in self.A:
-                    self.model += (self.u[i] >= (self.n - 2) * self.x[i, 0] + 
-                        mip.xsum(self.x[j, i] for j in self.V if (i, j) in self.A if j != 0))
-
-                    self.model += (self.u[i] <= self.n - (self.n - 2) * self.x[0, i] -  
-                        mip.xsum(self.x[i, j] for j in self.V if (i, j) in self.A if j != 0))
-        # elif(self.model_type.lower() in ('rlt', 'sd')):
-        #     if(relax):
-        #         self.u = {i: self.model.add_var(lb=0, ub=(self.n-1)) for i in self.V}
-        #     else:
-        #         #self.u = {i: self.model.add_var(var_type=mip.INTEGER, lb=0, ub=(self.n-1)) for i in self.V}
-        #         self.u = {i: self.model.add_var(lb=0, ub=(self.n-1)) for i in self.V}
-        #     for(i, j) in self.A:
-        #         if(j!=0):
-        #             self.model += (self.u[i] - self.u[j] + self.n * self.x[i, j] <= self.n - 1)
-        else:
-            raise NameError('Undefined model type!')
 
     def printU(self):
         try:
@@ -170,3 +127,9 @@ class Matrix_TSP_MTZ_Model(MatrixTspBaseModel):
             return
         for msg in (print('u[{}] = {}'.format(j, self.u[j].x)) for j in self.V):
             msg
+
+    def passRouteToVars(self, route):
+        ###
+        # TODO
+        ###
+        return

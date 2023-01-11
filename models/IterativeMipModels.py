@@ -1,7 +1,7 @@
 import mip
 import time
 from networkx import simple_cycles, DiGraph
-from BasicMipModels import MatrixTspBaseModel
+from BaseTspMipModels import MatrixTspBaseModel
 
 class Matrix_Iterative_TSP_DFJ_Model(MatrixTspBaseModel):
     """Class to instantiate an iterative solution TSP model based on the classic DFJ formulation."""
