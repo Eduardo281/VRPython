@@ -1,20 +1,12 @@
 import mip
-import numpy as np
 
-class MatrixTspBaseModel(object):
+class CommonTspMipBaseModel(object):
     """Class to instantiate the common \"Base TSP\" model, that is, a binary assignment model,
-    with functions to solve the model, print the $x$ variables, and show points and solutions."""
-    def __init__(self, c:np.ndarray, relax_X_vars:bool=False, solver:str="CBC", labels:np.ndarray=None):
-        if(not isinstance(c, np.ndarray)):
-            try:
-                self.c = np.array(c)
-            except:
-                raise TypeError("[ERROR] Could not convert data entered into a numpy.ndarray!")
-        else:
-            self.c = c
-        if(self.c.shape[0] != self.c.shape[1]):
-            raise RuntimeError("[ERROR] Data must be a matrix having the same number of lines and columns!")
-        self.n = len(self.c)
+    with functions to solve the model, print the $x$ variables, and show points and solutions.
+    This should be treated as a \"virtual\" class, in the sense that it is not intented to be
+    used to instantiate any kind of model."""
+    def __init__(self, n:int, relax_X_vars:bool=False, solver:str="CBC"):
+        self.n = n
         self.V = set(range(self.n))
         self.A = [(i, j) for i in self.V for j in self.V if(i != j)]
         self.route = []
@@ -33,9 +25,6 @@ class MatrixTspBaseModel(object):
             self.x = {(i, j): self.model.add_var(lb=0, ub=1) for (i, j) in self.A}
         else:
             self.x = {(i, j): self.model.add_var(var_type=mip.BINARY) for (i, j) in self.A}
-
-        # Objective Function
-        self.model.objective = mip.xsum(self.c[i, j] * self.x[i, j] for (i, j) in self.A)
 
         # All nodes must be visited exactly one time
         for i in self.V:
@@ -110,10 +99,18 @@ class MatrixTspBaseModel(object):
         print(" 0\n")
         return
 
-class MatrixTspMtzBaseModel(MatrixTspBaseModel):
+class MatrixTspMipBaseModel(CommonTspMipBaseModel):
+    def __init__(self, c:list, relax_X_vars:bool=False, solver:str="CBC"):
+        CommonTspMipBaseModel.__init__(self, len(c[0]), relax_X_vars, solver)
+        self.c = c
+
+        # Objective Function
+        self.model.objective = mip.xsum(self.c[i, j] * self.x[i, j] for (i, j) in self.A)
+
+class MatrixTspMtzBaseModel(MatrixTspMipBaseModel):
     """Class to instantiate TSP models based on the Miller-Tucker-Zemlin (MTZ) formulation."""
     def __init__(self, c, relax_X_vars=False, relax_U_vars=True, solver="CBC"):
-        MatrixTspBaseModel.__init__(self, c, relax_X_vars, solver)
+        MatrixTspMipBaseModel.__init__(self, c, relax_X_vars, solver)
 
         if(relax_U_vars):
             self.u = {i: self.model.add_var(lb=0, ub=(self.n-1)) for i in self.V}
