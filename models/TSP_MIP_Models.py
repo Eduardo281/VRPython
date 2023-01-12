@@ -1,16 +1,16 @@
 import mip
 from itertools import chain, combinations
-from BaseTspMipModels import MatrixTspBaseModel, MatrixTspMtzBaseModel
+from BaseTspMipModels import MatrixTspMipBaseModel, MatrixTspMtzBaseModel
 
-class Matrix_TSP_DFJ_Model(MatrixTspBaseModel):
+class Matrix_TSP_DFJ_Model(MatrixTspMipBaseModel):
     """Class to instantiate the TSP model based on the classic DFJ formulation."""
     def __init__(self, c, relax_X_vars=False, solver="CBC"):
-        MatrixTspBaseModel.__init__(self, c, relax_X_vars, solver)
+        MatrixTspMipBaseModel.__init__(self, c, relax_X_vars, solver)
 
-        # Setting the DFJ Sub-tour elimination constraints:
-        self.POWER_SET = list(chain.from_iterable( combinations(self.V, r) for r in range(2, len(self.V)) ))
-
-        for cst in (mip.xsum(self.x[i, j] for i in S for j in S if i != j) <= len(S) - 1 for S in self.POWER_SET):
+        # Adding all the DFJ constraints in a "lazy" approach:
+        for cst in (mip.xsum(self.x[i, j] for i in S for j in S if i != j) <= len(S) - 1 for S in 
+            chain.from_iterable(combinations(self.V, r) for r in range(2, len(self.V)))
+        ):
             self.model += cst
 
 class Matrix_TSP_MTZ_Model(MatrixTspMtzBaseModel):
