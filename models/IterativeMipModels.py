@@ -48,6 +48,7 @@ class Matrix_Iterative_TSP_DFJ_Model(MatrixTspMipBaseModel):
                     except:
                         return
                     self.updateSolution()
+                    return
 
             for cycle in self.sub_circuits:
                 self.model += (mip.xsum(self.x[i, j] for i in cycle for j in cycle if (i != j)) <= len(cycle) - 1)
