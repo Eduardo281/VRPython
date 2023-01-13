@@ -12,6 +12,8 @@ class Matrix_Iterative_TSP_DFJ_Model(MatrixTspMipBaseModel):
     def solve(self, totalRuntime=None, heur=None, printSolverLog=False, printIterationsLog=True):
         if(totalRuntime != None):
             self.model.max_seconds = totalRuntime
+        else:
+            totalRuntime = mip.constants.INF
         if(heur != None):
             pass
         if(printSolverLog):
@@ -26,7 +28,7 @@ class Matrix_Iterative_TSP_DFJ_Model(MatrixTspMipBaseModel):
 
         while True:
             start_solving_time = time.time()
-            self.model.max_seconds = max(totalRuntime - self.totalSolutionTime, 0)
+            self.model.max_seconds = totalRuntime - self.totalSolutionTime
             self.model.optimize()
             self.totalSolutionTime += (time.time() - start_solving_time)
             routesWithWeights = [(i, j, self.c[i][j]) for (i, j) in self.A if self.x[i, j].x > 0.5]
