@@ -74,3 +74,7 @@ class CommonTspCpBaseModel(object):
     def updateSolution(self):
         self.updateRouteAndRouteList()
         self.objectiveValue = self.solution.ObjectiveValue()
+
+    def createTransitCallbackIndex(self, distanceCallbackFunction):
+        self.transitCallbackIndex = self.routing.RegisterTransitCallback(distanceCallbackFunction)
+        self.routing.SetArcCostEvaluatorOfAllVehicles(self.transitCallbackIndex)
