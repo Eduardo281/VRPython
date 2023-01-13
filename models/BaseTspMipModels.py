@@ -108,7 +108,8 @@ class MatrixTspMipBaseModel(CommonTspMipBaseModel):
         self.model.objective = mip.xsum(self.c[i][j] * self.x[i, j] for (i, j) in self.A)
 
 class MatrixTspMtzBaseModel(MatrixTspMipBaseModel):
-    """Class to instantiate TSP models based on the Miller-Tucker-Zemlin (MTZ) formulation."""
+    """Class to instantiate TSP models based on the classic Miller-Tucker-Zemlin, 1960 (MTZ) 
+    formulation."""
     def __init__(self, c, relax_X_vars=False, relax_U_vars=True, solver="CBC"):
         MatrixTspMipBaseModel.__init__(self, c, relax_X_vars, solver)
 

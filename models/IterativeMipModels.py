@@ -4,7 +4,8 @@ from networkx import simple_cycles, DiGraph
 from BaseTspMipModels import MatrixTspMipBaseModel
 
 class Matrix_Iterative_TSP_DFJ_Model(MatrixTspMipBaseModel):
-    """Class to instantiate an iterative solution TSP model based on the classic DFJ formulation."""
+    """Class to instantiate an iterative solution TSP model based on the classic 
+    Dantzig-Fulkerson-Johnson, 1954 (DFJ) formulation."""
     def __init__(self, c, relax_X_vars=False, solver="CBC"):
         MatrixTspMipBaseModel.__init__(self, c, relax_X_vars, solver)
 

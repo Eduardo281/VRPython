@@ -23,7 +23,8 @@ class Matrix_TSP_MTZ_Model(MatrixTspMtzBaseModel):
                 self.model += (self.u[i] - self.u[j] + self.n * self.x[i, j] <= self.n - 1)
 
 class Matrix_TSP_DL_Model(MatrixTspMtzBaseModel):
-    """Class to instantiate the TSP model based on the lifted MTZ formulation."""
+    """Class to instantiate the TSP model based on the lifted MTZ formulation,
+    due to Desrochers and Laporte, 1991 (DL)."""
     def __init__(self, c, relax_X_vars=False, relax_U_vars=True, solver="CBC"):
         MatrixTspMtzBaseModel.__init__(self, c, relax_X_vars, relax_U_vars, solver)
 
@@ -39,7 +40,9 @@ class Matrix_TSP_DL_Model(MatrixTspMtzBaseModel):
                     mip.xsum(self.x[i, j] for j in self.V if (i, j) in self.A if j != 0))
 
 class Matrix_TSP_SD_Model(MatrixTspMtzBaseModel):
-    """Class to instantiate the TSP model based on the lifted MTZ formulation."""
+    """Class to instantiate the TSP model based on the Sherali and Driscoll, 2002 (SD)
+    formulation, obtained by applying a partial first level version of the 
+    Reformulation-linearization technique (RLT)."""
     def __init__(self, c, relax_X_vars=False, relax_U_vars=True, solver="CBC"):
         MatrixTspMtzBaseModel.__init__(self, c, relax_X_vars, relax_U_vars, solver)
 
