@@ -105,7 +105,7 @@ class MatrixTspMipBaseModel(CommonTspMipBaseModel):
         self.c = c
 
         # Objective Function
-        self.model.objective = mip.xsum(self.c[i, j] * self.x[i, j] for (i, j) in self.A)
+        self.model.objective = mip.xsum(self.c[i][j] * self.x[i, j] for (i, j) in self.A)
 
 class MatrixTspMtzBaseModel(MatrixTspMipBaseModel):
     """Class to instantiate TSP models based on the Miller-Tucker-Zemlin (MTZ) formulation."""

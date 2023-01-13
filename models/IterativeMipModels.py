@@ -27,7 +27,7 @@ class Matrix_Iterative_TSP_DFJ_Model(MatrixTspMipBaseModel):
             start_solving_time = time.time()
             self.model.optimize()
             self.totalSolutionTime += (time.time() - start_solving_time)
-            routesWithWeights = [(i, j, self.c[i, j]) for (i, j) in self.A if self.x[i, j].x > 0.5]
+            routesWithWeights = [(i, j, self.c[i][j]) for (i, j) in self.A if self.x[i, j].x > 0.5]
             if(printIterationsLog):
                 print('Iteration {}:'.format(self.totalIter))
                 print("\tPresent objective value: {}".format(self.model.objective_value))
