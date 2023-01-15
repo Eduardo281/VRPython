@@ -14,6 +14,7 @@ class CommonTspMipBaseModel(object):
         self.route = []
         self.routeList = []
         self.objectiveValue = None
+        self.solution = None
 
         self.modelSense = mip.MINIMIZE
         if(solver.lower()=="cbc"):
@@ -58,6 +59,10 @@ class CommonTspMipBaseModel(object):
     def updateSolution(self):
         self.updateRouteAndRouteList()
         self.objectiveValue = self.model.objective_value
+        self.solution = {
+            "objectiveValue": self.objectiveValue,
+            "sequence": self.routeList
+        }
 
     def solve(self, totalRuntime=None, heur=None, printSolverLog:bool=False) -> None:
         if(totalRuntime != None):

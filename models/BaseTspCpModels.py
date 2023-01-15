@@ -7,6 +7,7 @@ class CommonTspCpBaseModel(object):
         self.route = []
         self.routeList = []
         self.objectiveValue = None
+        self.solution = None
 
         self.manager = pywrapcp.RoutingIndexManager(self.n, 1, 0)
         self.routing = pywrapcp.RoutingModel(self.manager)
@@ -74,6 +75,10 @@ class CommonTspCpBaseModel(object):
     def updateSolution(self):
         self.updateRouteAndRouteList()
         self.objectiveValue = self.solution.ObjectiveValue()
+        self.solution = {
+            "objectiveValue": self.objectiveValue,
+            "sequence": self.routeList
+        }
 
     def createTransitCallbackIndex(self, distanceCallbackFunction):
         self.transitCallbackIndex = self.routing.RegisterTransitCallback(distanceCallbackFunction)
