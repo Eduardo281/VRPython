@@ -1,5 +1,5 @@
 import math
-from BaseTspCpModels import CommonTspCpBaseModel
+from .BaseTspCpModels import CommonTspCpBaseModel
 
 class Matrix_TSP_CP_Model(CommonTspCpBaseModel):
     def __init__(self, c):

@@ -1,6 +1,6 @@
 import mip
 from itertools import chain, combinations
-from BaseTspMipModels import MatrixTspMipBaseModel, MatrixTspMtzBaseModel
+from .BaseTspMipModels import MatrixTspMipBaseModel, MatrixTspMtzBaseModel
 
 class Matrix_TSP_DFJ_Model(MatrixTspMipBaseModel):
     """Class to instantiate the TSP model based on the classic DFJ formulation."""
